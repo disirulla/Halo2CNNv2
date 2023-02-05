@@ -44,7 +44,6 @@ impl<F: FieldExt> CNNChip<F>{
         let reltable = ReLULoookUp::configure(meta, MAXCONVVALUE);
 
         for l in 0..CONLAYERSCOUNT{
-            println!("Layer {} with these following dims {}, {}",l, DIMS[l][0], DIMS[l][2]);
             let buflayer = Layer::new_layer(meta,DIMS[l][0], DIMS[l][1], DIMS[l][2], DIMS[l][3]);
             conlayers.push(buflayer);
         

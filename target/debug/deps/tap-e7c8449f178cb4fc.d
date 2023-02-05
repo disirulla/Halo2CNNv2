@@ -1,0 +1,10 @@
+/Users/siddharthaalluri/Desktop/Halo2CNNv2/target/debug/deps/tap-e7c8449f178cb4fc.rmeta: /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/tap-1.0.1/src/lib.rs /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/tap-1.0.1/src/conv.rs /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/tap-1.0.1/src/pipe.rs /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/tap-1.0.1/src/tap.rs
+
+/Users/siddharthaalluri/Desktop/Halo2CNNv2/target/debug/deps/libtap-e7c8449f178cb4fc.rlib: /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/tap-1.0.1/src/lib.rs /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/tap-1.0.1/src/conv.rs /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/tap-1.0.1/src/pipe.rs /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/tap-1.0.1/src/tap.rs
+
+/Users/siddharthaalluri/Desktop/Halo2CNNv2/target/debug/deps/tap-e7c8449f178cb4fc.d: /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/tap-1.0.1/src/lib.rs /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/tap-1.0.1/src/conv.rs /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/tap-1.0.1/src/pipe.rs /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/tap-1.0.1/src/tap.rs
+
+/Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/tap-1.0.1/src/lib.rs:
+/Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/tap-1.0.1/src/conv.rs:
+/Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/tap-1.0.1/src/pipe.rs:
+/Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/tap-1.0.1/src/tap.rs:
