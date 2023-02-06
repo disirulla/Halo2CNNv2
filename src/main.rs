@@ -13,13 +13,13 @@ use halo2_proofs::{dev::MockProver, pasta::Fp};
 use std::time::{Duration, Instant};
 
 
-static CONLAYERSCOUNT:usize = 4; 
+static CONLAYERSCOUNT:usize = 5; 
 static L1DIMS: [usize; 4] = [8,8,3,3]; 
 static L2DIMS: [usize; 4] = [6,6,2,2];
 static L3DIMS: [usize; 4] = [5,5,2,2];
 static L4DIMS: [usize; 4] = [4,4,2,2];
-
-static DIMS:[[usize;4];4] = [L1DIMS, L2DIMS, L3DIMS, L4DIMS];
+static L5DIMS: [usize; 4] = [3,3,1,1];
+static DIMS:[[usize;4];5] = [L1DIMS, L2DIMS, L3DIMS, L4DIMS, L5DIMS];
 static MAXCONVVALUE:usize = DIMS[0][2]*DIMS[0][3]*5*255;
 
 
@@ -265,48 +265,18 @@ impl<F: FieldExt> Circuit<F> for CNNCircuit<F>{
 
 fn main() {
     let k = 18; // Alter based on # of rows
-
-        let mut rng = rand::thread_rng();
-        
-        // Kernels
-        let mut kernels = vec![];
-        for i in 0..CONLAYERSCOUNT{
-            kernels.push(vec![]);
-          for j in 0..DIMS[i][3]{
-                kernels[i].push(vec![]);
-                for k in 0..DIMS[i][2]{
-                    let mut buf = Value::known(Fp::zero());
-                    let random_value:f32 = rng.gen_range(0.0..=5.0);
-                    let x = random_value.round() as i32;
-                    if x < 0
-                    { buf = Value::known(-Fp::from(x as u64));} 
-                    else 
-                    {buf = Value::known(Fp::from(x as u64));} 
-                    kernels[i][j].push(buf);    
-                }
-                }
-             }
-        
-        
     
+        use lib::InputGenerator;
+        let gen = InputGenerator::new_input(DIMS.to_vec(), MAXCONVVALUE);
 
-        // Random Image
-        let mut image = Vec::new();
-        for j in 0..DIMS[0][1]{
-            image.push(vec![]);
-            for k in 0..DIMS[0][0]{
-                let x = rng.gen_range(0..=255);
-                let mut buf = Value::known(Fp::from(x));
-                image[j].push(buf);    
-            }
-        }
+        let init_image = gen.image;
+        let kernels = gen.kernels;
 
 
         let circuit = CNNCircuit {
-            initial_image: image,
+            initial_image: init_image,
             kernels,
         };
-
 
         // MockProver
         let start = Instant::now();
