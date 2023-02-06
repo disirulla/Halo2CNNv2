@@ -5,16 +5,21 @@ use rand::Rng;
 use std::marker::PhantomData;
 use std::ops::{Neg, Add};
 use halo2_proofs::arithmetic::FieldExt;
-use halo2_proofs::circuit::{Layouter, SimpleFloorPlanner, Value};
+use halo2_proofs::circuit::floor_planner::V1;
+use halo2_proofs::circuit::{Layouter, Value}; 
 use halo2_proofs::plonk::{Advice, Circuit, Column, ConstraintSystem, Error, Instance, Selector, Expression, Constraints, TableColumn};
 use halo2_proofs::poly::Rotation;
 use halo2_proofs::{dev::MockProver, pasta::Fp};
 use std::time::{Duration, Instant};
 
-static CONLAYERSCOUNT:usize = 2; 
-static L1DIMS: [usize; 4] = [4,4,2,2]; 
-static L2DIMS: [usize; 4] = [3,3,2,2];
-static DIMS:[[usize;4];2] = [L1DIMS, L2DIMS];
+
+static CONLAYERSCOUNT:usize = 4; 
+static L1DIMS: [usize; 4] = [8,8,3,3]; 
+static L2DIMS: [usize; 4] = [6,6,2,2];
+static L3DIMS: [usize; 4] = [5,5,2,2];
+static L4DIMS: [usize; 4] = [4,4,2,2];
+
+static DIMS:[[usize;4];4] = [L1DIMS, L2DIMS, L3DIMS, L4DIMS];
 static MAXCONVVALUE:usize = DIMS[0][2]*DIMS[0][3]*5*255;
 
 
@@ -142,7 +147,7 @@ struct CNNCircuit<F: FieldExt>{
 impl<F: FieldExt> Circuit<F> for CNNCircuit<F>{
     
     type Config = CNN<F>;
-    type FloorPlanner = SimpleFloorPlanner;
+    type FloorPlanner = V1;
 
     fn configure(meta: &mut ConstraintSystem<F>) -> Self::Config {
         CNNChip::configure(meta)
@@ -316,5 +321,6 @@ fn main() {
         }
         println!("Time taken by MockProver: {:?}", duration);
 
+       
             
 }
