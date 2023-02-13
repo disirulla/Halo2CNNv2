@@ -5,6 +5,7 @@ use rand::Rng;
 use std::marker::PhantomData;
 use std::ops::{Neg, Add};
 use halo2_proofs::arithmetic::FieldExt;
+use halo2_proofs::arithmetic::*;
 use halo2_proofs::circuit::floor_planner::V1;
 use halo2_proofs::circuit::{Layouter, Value}; 
 use halo2_proofs::plonk::{Advice, Circuit, Column, ConstraintSystem, Error, Instance, Selector, Expression, Constraints, TableColumn};
@@ -13,13 +14,13 @@ use halo2_proofs::{dev::MockProver, pasta::Fp};
 use std::time::{Duration, Instant};
 
 
-static CONLAYERSCOUNT:usize = 5; 
-static L1DIMS: [usize; 4] = [8,8,3,3]; 
-static L2DIMS: [usize; 4] = [6,6,2,2];
-static L3DIMS: [usize; 4] = [5,5,2,2];
-static L4DIMS: [usize; 4] = [4,4,2,2];
-static L5DIMS: [usize; 4] = [3,3,1,1];
-static DIMS:[[usize;4];5] = [L1DIMS, L2DIMS, L3DIMS, L4DIMS, L5DIMS];
+static CONLAYERSCOUNT:usize = 3; 
+static L1DIMS: [usize; 4] = [28,28,13,13]; 
+static L2DIMS: [usize; 4] = [16,16,13,13];
+static L3DIMS: [usize; 4] = [4,4,2,2];
+// static L4DIMS: [usize; 4] = [4,4,2,2];
+// static L5DIMS: [usize; 4] = [3,3,1,1];
+static DIMS:[[usize;4];3] = [L1DIMS, L2DIMS, L3DIMS];
 static MAXCONVVALUE:usize = DIMS[0][2]*DIMS[0][3]*5*255;
 
 
@@ -41,6 +42,17 @@ struct CNNChip<F: FieldExt>{
 
 impl<F: FieldExt> CNNChip<F>{
     
+    // pub fn dotgate(l:usize, off:usize,imw:usize, iml:usize, kerw:usize, kerl:usize,meta: &mut ConstraintSystem<F>, conlayers:Vec<Layer<F>>){
+    //     meta.create_gate("dot", |meta|{
+    //         let im = vec![];
+    //         for i in 0..imw{
+    //             for j in 0..iml{
+    //                 let buf = meta.query_advice(conlayers[l].image.data[i], Rotation(j as i32));
+    //             }
+    //         }
+    //     });
+    // }
+
     pub fn configure(meta: &mut ConstraintSystem<F>) -> CNN<F> {
         
         let mut conlayers = vec![];
@@ -52,88 +64,83 @@ impl<F: FieldExt> CNNChip<F>{
             let buflayer = Layer::new_layer(meta,DIMS[l][0], DIMS[l][1], DIMS[l][2], DIMS[l][3]);
             conlayers.push(buflayer);
         
+            
+            // seldot.push(vec![]);
             seldot.push(meta.selector());
             selrel.push(meta.complex_selector());
         
             let conwid = DIMS[l][1] - DIMS[l][3] +1;
             let conlen = DIMS[l][0] - DIMS[l][2] +1;
-        meta.create_gate("conv", |meta|{
+            // for i in 0..conwid{
+            //     seldot[l].push(meta.selector());
+            // }
 
-            let s = meta.query_selector(seldot[l]);
-            let mut diff = vec![];
-            
-                
-                let mut imgcells = vec![];
-                for i in 0..DIMS[l][1]{
-                    imgcells.push(Vec::new());
-                    for j in 0..DIMS[l][0]{
-                        let buf = meta.query_advice(conlayers[l].image.data[i], Rotation(j as i32));
-                        imgcells[i].push(buf);
-                    }
-                }
+            for k in 0..conwid{
+                for n in 0..conlen{
+                    meta.create_gate("conv", |meta|{
+                        let s = meta.query_selector(seldot[l]);
+                        let mut diff = vec![];
+        
+                        let mut imgcells = vec![];
+                        let mut kercells = vec![];
+                        for i in 0..DIMS[l][3]{
+                            imgcells.push(vec![]);
+                            kercells.push(vec![]);
 
-                let mut kercells = vec![];
-                for i in 0..DIMS[l][3]{
-                    kercells.push(Vec::new());
-                    for j in 0..DIMS[l][2]{
-                        let buf = meta.query_advice(conlayers[l].kernel.data[i], Rotation(j as i32));
-                        kercells[i].push(buf);
-                    }
-                }
+                            for j in 0..DIMS[l][2]{
+                               let bufimg = meta.query_advice(conlayers[l].image.data[i+k], Rotation((n+j) as i32));
+                                imgcells[i].push(bufimg.clone());
 
-                
-
-                let mut concells = vec![];
-                for i in 0..conwid{
-                concells.push(Vec::new());
-                for j in 0..conlen{
-                    let buf = meta.query_advice(conlayers[l].inter.data[i], Rotation(j as i32));
-                    concells[i].push(buf);
-                     }
-                }
-
-                let mut condash = vec![];
-                for i in 0..conwid{
-                    condash.push(vec![]);
-                    for j in 0..conlen{
-                        let mut conval = Expression::Constant(F::zero());                 
-                        // let mut conval = Expression::Constant(F::one());   // A bug                
-                        for k in 0..DIMS[l][3]{
-                            for l in 0..DIMS[l][2]{
-                                conval = conval + (imgcells[i+k][j+l].clone()*kercells[k][l].clone());
+                                let bufker = meta.query_advice(conlayers[l].kernel.data[i], Rotation(j as i32));
+                                kercells[i].push(bufker.clone());
                             }
                         }
-                condash[i].push(conval);   
-                let buf = condash[i][j].clone() - (concells[i][j].clone());
-                diff.push(buf);
+                        
+                        // let kercells = vec![];
+                        // for 
+    
+                        let concell = meta.query_advice(conlayers[l].inter.data[k], Rotation(n as i32));
+        
+                        let mut conval = Expression::Constant(F::zero());                 
+                        // let mut conval = Expression::Constant(F::one());   // A bug                
+                        for o in 0..DIMS[l][3]{
+                            for p in 0..DIMS[l][2]{
+                                // let fil_val = meta.query_advice(conlayers[l].kernel.data[o], Rotation(p as i32));
+                                conval = conval + (imgcells[o][p].clone()*kercells[o][p].clone());
+                            }
+                        }
+                        diff.push(conval.clone()-concell.clone());
+        
+                        Constraints::with_selector(s, diff)  }
+                    );
                 }
             }
-            
-        Constraints::with_selector(s, diff)   
-        });
-    
-        for i in 0..conwid{
-            for j in 0..conlen{
-                meta.lookup(|meta| {
-                    let selrel = meta.query_selector(selrel[l]);
-                    let valueop = meta.query_advice(conlayers[l].relu.data[i], Rotation(j as i32));
-                    vec![(selrel*valueop , reltable.relop)]
-              
-                 });
-                }}
 
-            }
-        CNN {
+            
+    
+        // for i in 0..conwid{
+        //     for j in 0..conlen{
+        //         meta.lookup(|meta| {
+        //             let selrel = meta.query_selector(selrel[l]);
+        //             let valueop = meta.query_advice(conlayers[l].relu.data[i], Rotation(j as i32));
+        //             vec![(selrel*valueop , reltable.relop)]
+              
+        //          });
+        //         }}
+
+            
+        }
+        
+         return CNN {
             conlayers,
             seldot,
             selrel,
             reltable,
-            _marker: PhantomData, }
+            _marker: PhantomData, };
+    
     }
 
 }
-
-
 
 
 
@@ -164,8 +171,6 @@ impl<F: FieldExt> Circuit<F> for CNNCircuit<F>{
         let cnn = layouter.assign_region(|| "layer".to_owned()+&i.to_string(), |mut region|{
             
 
-            config.seldot[i].enable(&mut region, 0)?;
-            config.selrel[i].enable(&mut region, 0)?;
             
             // Image Load
             let mut imgcells = vec![];
@@ -200,6 +205,8 @@ impl<F: FieldExt> Circuit<F> for CNNCircuit<F>{
 
             // Convolution 
             let mut convcells = vec![];
+            config.seldot[i].enable(&mut region, 0)?;
+
             for m in 0..conwid{
                 convcells.push(vec![]);
                 for j in 0..conlen {
@@ -225,9 +232,11 @@ impl<F: FieldExt> Circuit<F> for CNNCircuit<F>{
             // ReLU
             let mut relcells = vec![];
             for m in 0..conwid{
+                
                 relcells.push(vec![]);
                 bufimg.push(vec![]);
                 for j in 0..conlen {
+                    config.selrel[i].enable(&mut region, j)?;
                     let maxconvval = Value::known(F::from(MAXCONVVALUE as u64));                 
                     let rel_val = convcells[m][j].clone().value().copied().zip(maxconvval).map(|(a,b)| {
                         let  zero = F::zero(); 
@@ -248,7 +257,7 @@ impl<F: FieldExt> Circuit<F> for CNNCircuit<F>{
             
         };
 
-            Ok(relcells)
+            Ok(imgcells)
 
 
         });
@@ -283,12 +292,13 @@ fn main() {
         let prover = MockProver::run(k, &circuit, vec![]);
         let duration = start.elapsed();
 
-        // prover.unwrap().assert_satisfied();
-        match prover.unwrap().verify(){
-            Ok(()) => { println!("Yes proved!")},
-            Err(_) => {println!("Not proved!")}
+        
+        prover.unwrap().assert_satisfied();
+        // match prover.unwrap().verify(){
+        //     Ok(()) => { println!("Yes proved!")},
+        //     Err(_) => {println!("Not proved!")}
 
-        }
+        // }
         println!("Time taken by MockProver: {:?}", duration);
 
        

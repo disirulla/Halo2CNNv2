@@ -1,0 +1,8 @@
+/Users/siddharthaalluri/Desktop/Halo2CNNv2/target/debug/deps/crossbeam_deque-2255af2e3b2c9688.rmeta: /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/crossbeam-deque-0.8.2/src/lib.rs /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/crossbeam-deque-0.8.2/src/deque.rs
+
+/Users/siddharthaalluri/Desktop/Halo2CNNv2/target/debug/deps/libcrossbeam_deque-2255af2e3b2c9688.rlib: /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/crossbeam-deque-0.8.2/src/lib.rs /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/crossbeam-deque-0.8.2/src/deque.rs
+
+/Users/siddharthaalluri/Desktop/Halo2CNNv2/target/debug/deps/crossbeam_deque-2255af2e3b2c9688.d: /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/crossbeam-deque-0.8.2/src/lib.rs /Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/crossbeam-deque-0.8.2/src/deque.rs
+
+/Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/crossbeam-deque-0.8.2/src/lib.rs:
+/Users/siddharthaalluri/.cargo/registry/src/github.com-1ecc6299db9ec823/crossbeam-deque-0.8.2/src/deque.rs:
