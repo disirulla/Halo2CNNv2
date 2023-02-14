@@ -15,12 +15,11 @@ use std::time::{Duration, Instant};
 
 
 static CONLAYERSCOUNT:usize = 3; 
-static L1DIMS: [usize; 4] = [28,28,13,13]; 
-static L2DIMS: [usize; 4] = [16,16,13,13];
+static L1DIMS: [usize; 4] = [28,28,14,14]; 
+static L2DIMS: [usize; 4] = [15,15,12,12];
 static L3DIMS: [usize; 4] = [4,4,2,2];
-// static L4DIMS: [usize; 4] = [4,4,2,2];
-// static L5DIMS: [usize; 4] = [3,3,1,1];
-static DIMS:[[usize;4];3] = [L1DIMS, L2DIMS, L3DIMS];
+
+static DIMS:[[usize;4];3] = [L1DIMS,L2DIMS,L3DIMS];
 static MAXCONVVALUE:usize = DIMS[0][2]*DIMS[0][3]*5*255;
 
 
@@ -41,18 +40,7 @@ struct CNNChip<F: FieldExt>{
 }
 
 impl<F: FieldExt> CNNChip<F>{
-    
-    // pub fn dotgate(l:usize, off:usize,imw:usize, iml:usize, kerw:usize, kerl:usize,meta: &mut ConstraintSystem<F>, conlayers:Vec<Layer<F>>){
-    //     meta.create_gate("dot", |meta|{
-    //         let im = vec![];
-    //         for i in 0..imw{
-    //             for j in 0..iml{
-    //                 let buf = meta.query_advice(conlayers[l].image.data[i], Rotation(j as i32));
-    //             }
-    //         }
-    //     });
-    // }
-
+ 
     pub fn configure(meta: &mut ConstraintSystem<F>) -> CNN<F> {
         
         let mut conlayers = vec![];
@@ -65,15 +53,12 @@ impl<F: FieldExt> CNNChip<F>{
             conlayers.push(buflayer);
         
             
-            // seldot.push(vec![]);
             seldot.push(meta.selector());
             selrel.push(meta.complex_selector());
         
             let conwid = DIMS[l][1] - DIMS[l][3] +1;
             let conlen = DIMS[l][0] - DIMS[l][2] +1;
-            // for i in 0..conwid{
-            //     seldot[l].push(meta.selector());
-            // }
+           
 
             for k in 0..conwid{
                 for n in 0..conlen{
@@ -96,8 +81,7 @@ impl<F: FieldExt> CNNChip<F>{
                             }
                         }
                         
-                        // let kercells = vec![];
-                        // for 
+                       
     
                         let concell = meta.query_advice(conlayers[l].inter.data[k], Rotation(n as i32));
         
@@ -105,7 +89,6 @@ impl<F: FieldExt> CNNChip<F>{
                         // let mut conval = Expression::Constant(F::one());   // A bug                
                         for o in 0..DIMS[l][3]{
                             for p in 0..DIMS[l][2]{
-                                // let fil_val = meta.query_advice(conlayers[l].kernel.data[o], Rotation(p as i32));
                                 conval = conval + (imgcells[o][p].clone()*kercells[o][p].clone());
                             }
                         }
@@ -118,15 +101,15 @@ impl<F: FieldExt> CNNChip<F>{
 
             
     
-        // for i in 0..conwid{
-        //     for j in 0..conlen{
-        //         meta.lookup(|meta| {
-        //             let selrel = meta.query_selector(selrel[l]);
-        //             let valueop = meta.query_advice(conlayers[l].relu.data[i], Rotation(j as i32));
-        //             vec![(selrel*valueop , reltable.relop)]
+        for i in 0..conwid{
+            
+                meta.lookup(|meta| {
+                    let selrel = meta.query_selector(selrel[l]);
+                    let valueop = meta.query_advice(conlayers[l].relu.data[i], Rotation::cur());
+                    vec![(selrel*valueop , reltable.relop)]
               
-        //          });
-        //         }}
+                 });
+                }
 
             
         }
@@ -292,14 +275,14 @@ fn main() {
         let prover = MockProver::run(k, &circuit, vec![]);
         let duration = start.elapsed();
 
-        
-        prover.unwrap().assert_satisfied();
-        // match prover.unwrap().verify(){
-        //     Ok(()) => { println!("Yes proved!")},
-        //     Err(_) => {println!("Not proved!")}
-
-        // }
         println!("Time taken by MockProver: {:?}", duration);
+        
+        // prover.unwrap().assert_satisfied();
+        match prover.unwrap().verify(){
+            Ok(()) => { println!("Yes proved!")},
+            Err(_) => {println!("Not proved!")}
+
+        }
 
        
             
